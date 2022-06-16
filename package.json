@@ -19,7 +19,6 @@
   },
   "browser": "./lib/bundle.js",
   "main": "./lib/bundle.cjs",
-  "module": "./lib/bundle.js",
   "types": "./lib/index.d.ts",
   "files": [
     "lib"
@@ -66,7 +65,7 @@
     "@types/hoist-non-react-statics": "^3.3.1",
     "@types/jest": "^27.0.1",
     "@types/lodash": "^4.14.172",
-    "@types/react": "^17.0.11",
+    "@types/react": "^18.0.9",
     "@types/react-dom": "^17.0.8",
     "@types/react-router-dom": "^5.1.8",
     "@typescript-eslint/eslint-plugin": "^4.28.0",

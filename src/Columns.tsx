@@ -1,3 +1,4 @@
+import React from 'react';
 import { SelectCellFormatter } from './formatters';
 import { useRowSelection } from './hooks/useRowSelection';
 import type { Column, FormatterProps, GroupFormatterProps } from './types';

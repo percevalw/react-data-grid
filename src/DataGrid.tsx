@@ -1,4 +1,4 @@
-import { forwardRef, useState, useRef, useImperativeHandle, useCallback, useMemo } from 'react';
+import React, { forwardRef, useState, useRef, useImperativeHandle, useCallback, useMemo } from 'react';
 import type { Key, RefAttributes } from 'react';
 import clsx from 'clsx';
 

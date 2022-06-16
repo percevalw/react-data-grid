@@ -1,3 +1,4 @@
+import React from 'react';
 import { css } from '@linaria/core';
 
 import type { CalculatedColumn, SortColumn } from './types';

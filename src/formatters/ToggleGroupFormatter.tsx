@@ -1,3 +1,4 @@
+import React from 'react';
 import { css } from '@linaria/core';
 import type { GroupFormatterProps } from '../types';
 import { useFocusRef } from '../hooks/useFocusRef';
@@ -39,6 +40,7 @@ export function ToggleGroupFormatter<R, SR>({
   const d = isExpanded ? 'M1 1 L 7 7 L 13 1' : 'M1 7 L 7 1 L 13 7';
 
   return (
+    // @ts-ignore
     <span
       ref={ref}
       className={groupCellContentClassname}
