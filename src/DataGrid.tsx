@@ -46,6 +46,7 @@ import type {
   RowHeightArgs,
   Maybe
 } from './types';
+import {ActiveContext, useActiveElement} from "./hooks/useActiveElement";
 
 export interface SelectCellState extends Position {
   readonly mode: 'SELECT';
@@ -255,6 +256,7 @@ function DataGrid<R, SR, K extends Key>(
   const clientHeight = gridHeight - headerRowHeight - summaryRowsCount * summaryRowHeight;
   const isSelectable = selectedRows != null && onSelectedRowsChange != null;
   const isHeaderRowSelected = selectedPosition.rowIdx === -1;
+  const activeRef = useActiveElement(gridRef);
 
   const allRowsSelected = useMemo((): boolean => {
     // no rows to select = explicitely unchecked
@@ -1068,69 +1070,72 @@ function DataGrid<R, SR, K extends Key>(
   }
 
   return (
-    <div
-      role={hasGroups ? 'treegrid' : 'grid'}
-      aria-label={ariaLabel}
-      aria-labelledby={ariaLabelledBy}
-      aria-describedby={ariaDescribedBy}
-      aria-multiselectable={isSelectable ? true : undefined}
-      aria-colcount={columns.length}
-      aria-rowcount={headerRowsCount + rowsCount + summaryRowsCount}
-      className={clsx(rootClassname, { [viewportDraggingClassname]: isDragging }, className)}
-      style={
-        {
-          ...style,
-          '--header-row-height': `${headerRowHeight}px`,
-          '--row-width': `${totalColumnWidth}px`,
-          '--summary-row-height': `${summaryRowHeight}px`,
-          ...layoutCssVars
-        } as unknown as React.CSSProperties
-      }
-      ref={gridRef}
-      onScroll={handleScroll}
-      onKeyDown={handleKeyDown}
-      data-testid={testId}
-    >
-      <HeaderRow
-        columns={viewportColumns}
-        onColumnResize={handleColumnResize}
-        allRowsSelected={allRowsSelected}
-        onAllRowsSelectionChange={selectAllRowsLatest}
-        sortColumns={sortColumns}
-        onSortColumnsChange={onSortColumnsChange}
-        lastFrozenColumnIndex={lastFrozenColumnIndex}
-        selectedCellIdx={isHeaderRowSelected ? selectedPosition.idx : undefined}
-        selectCell={selectHeaderCellLatest}
-        shouldFocusGrid={!selectedCellIsWithinSelectionBounds}
-      />
-      {rows.length === 0 && noRowsFallback ? (
-        noRowsFallback
-      ) : (
-        <>
-          <div style={{ height: max(totalRowHeight, clientHeight) }} />
-          <RowSelectionChangeProvider value={selectRowLatest}>
-            {getViewportRows()}
-          </RowSelectionChangeProvider>
-          {summaryRows?.map((row, rowIdx) => {
-            const isSummaryRowSelected =
-              selectedPosition.rowIdx === headerRowsCount + rows.length + rowIdx - 1;
-            return (
-              <SummaryRow
-                aria-rowindex={headerRowsCount + rowsCount + rowIdx + 1}
-                key={rowIdx}
-                rowIdx={rowIdx}
-                row={row}
-                bottom={summaryRowHeight * (summaryRows.length - 1 - rowIdx)}
-                viewportColumns={viewportColumns}
-                lastFrozenColumnIndex={lastFrozenColumnIndex}
-                selectedCellIdx={isSummaryRowSelected ? selectedPosition.idx : undefined}
-                selectCell={selectSummaryCellLatest}
-              />
-            );
-          })}
-        </>
-      )}
-    </div>
+      // If activeRef.current is true, any rendering will autofocus on the selected cell
+      <ActiveContext.Provider value={activeRef}>
+        <div
+            role={hasGroups ? 'treegrid' : 'grid'}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledBy}
+            aria-describedby={ariaDescribedBy}
+            aria-multiselectable={isSelectable ? true : undefined}
+            aria-colcount={columns.length}
+            aria-rowcount={headerRowsCount + rowsCount + summaryRowsCount}
+            className={clsx(rootClassname, {[viewportDraggingClassname]: isDragging}, className)}
+            style={
+              {
+                ...style,
+                '--header-row-height': `${headerRowHeight}px`,
+                '--row-width': `${totalColumnWidth}px`,
+                '--summary-row-height': `${summaryRowHeight}px`,
+                ...layoutCssVars
+              } as unknown as React.CSSProperties
+            }
+            ref={gridRef}
+            onScroll={handleScroll}
+            onKeyDown={handleKeyDown}
+            data-testid={testId}
+        >
+          <HeaderRow
+              columns={viewportColumns}
+              onColumnResize={handleColumnResize}
+              allRowsSelected={allRowsSelected}
+              onAllRowsSelectionChange={selectAllRowsLatest}
+              sortColumns={sortColumns}
+              onSortColumnsChange={onSortColumnsChange}
+              lastFrozenColumnIndex={lastFrozenColumnIndex}
+              selectedCellIdx={isHeaderRowSelected ? selectedPosition.idx : undefined}
+              selectCell={selectHeaderCellLatest}
+              shouldFocusGrid={!selectedCellIsWithinSelectionBounds}
+          />
+          {rows.length === 0 && noRowsFallback ? (
+              noRowsFallback
+          ) : (
+              <>
+                <div style={{height: max(totalRowHeight, clientHeight)}}/>
+                <RowSelectionChangeProvider value={selectRowLatest}>
+                  {getViewportRows()}
+                </RowSelectionChangeProvider>
+                {summaryRows?.map((row, rowIdx) => {
+                  const isSummaryRowSelected =
+                      selectedPosition.rowIdx === headerRowsCount + rows.length + rowIdx - 1;
+                  return (
+                      <SummaryRow
+                          aria-rowindex={headerRowsCount + rowsCount + rowIdx + 1}
+                          key={rowIdx}
+                          rowIdx={rowIdx}
+                          row={row}
+                          bottom={summaryRowHeight * (summaryRows.length - 1 - rowIdx)}
+                          viewportColumns={viewportColumns}
+                          lastFrozenColumnIndex={lastFrozenColumnIndex}
+                          selectedCellIdx={isSummaryRowSelected ? selectedPosition.idx : undefined}
+                          selectCell={selectSummaryCellLatest}
+                      />
+                  );
+                })}
+              </>
+          )}
+        </div>
+      </ActiveContext.Provider>
   );
 }
 

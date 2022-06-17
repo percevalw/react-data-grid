@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { useLayoutEffect } from './useLayoutEffect';
+import {ActiveContext} from "./useActiveElement";
 
 // https://www.w3.org/TR/wai-aria-practices-1.1/#kbd_roving_tabindex
 export function useRovingCellRef(isSelected: boolean) {
@@ -7,6 +8,7 @@ export function useRovingCellRef(isSelected: boolean) {
   // https://www.w3.org/TR/wai-aria-practices-1.1/#gridNav_focus
   const isChildFocused = useRef(false);
   const [, forceRender] = useState<unknown>({});
+  const activeRef = useContext(ActiveContext);
 
   useLayoutEffect(() => {
     if (!isSelected) {
@@ -20,7 +22,8 @@ export function useRovingCellRef(isSelected: boolean) {
       forceRender({});
       return;
     }
-    ref.current?.focus();
+    if (activeRef.current)
+      ref.current?.focus();
   }, [isSelected]);
 
   function onFocus(event: React.FocusEvent<HTMLDivElement>) {
