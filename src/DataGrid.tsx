@@ -52,10 +52,8 @@ export interface SelectCellState extends Position {
   readonly mode: 'SELECT';
 }
 
-interface EditCellState<R> extends Position {
+interface EditCellState extends Position {
   readonly mode: 'EDIT';
-  readonly row: R;
-  readonly originalRow: R;
 }
 
 type DefaultColumnOptions<R, SR> = Pick<
@@ -68,6 +66,7 @@ const initialPosition: SelectCellState = {
   rowIdx: -2,
   mode: 'SELECT'
 };
+
 
 export interface DataGridHandle {
   element: HTMLDivElement | null;
@@ -121,6 +120,8 @@ export interface DataGridProps<R, SR = unknown, K extends Key = Key> extends Sha
    * Feature props
    */
   /** Set of selected row keys */
+  onSelectedPositionChange: (position: SelectCellState | EditCellState) => void;
+  selectedPosition: SelectCellState | EditCellState;
   selectedRows?: Maybe<ReadonlySet<K>>;
   /** Function called whenever row selection is changed */
   onSelectedRowsChange?: Maybe<(selectedRows: Set<K>) => void>;
@@ -193,6 +194,8 @@ function DataGrid<R, SR, K extends Key>(
     rowGrouper,
     expandedGroupIds,
     onExpandedGroupIdsChange,
+    selectedPosition=initialPosition,
+    onSelectedPositionChange,
     // Event props
     onRowClick,
     onRowDoubleClick,
@@ -233,9 +236,6 @@ function DataGrid<R, SR, K extends Key>(
   const [scrollTop, setScrollTop] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [columnWidths, setColumnWidths] = useState<ReadonlyMap<string, number>>(() => new Map());
-  const [selectedPosition, setSelectedPosition] = useState<SelectCellState | EditCellState<R>>(
-    initialPosition
-  );
   const [copiedCell, setCopiedCell] = useState<{ row: R; columnKey: string } | null>(null);
   const [isDragging, setDragging] = useState(false);
   const [draggedOverRowIdx, setOverRowIdx] = useState<number | undefined>(undefined);
@@ -395,7 +395,7 @@ function DataGrid<R, SR, K extends Key>(
    */
   const handleColumnResize = useCallback(
     (column: CalculatedColumn<R, SR>, width: number) => {
-      setColumnWidths((columnWidths) => {
+      setColumnWidths((columnWidths: Iterable<readonly [string, number]>) => {
         const newColumnWidths = new Map(columnWidths);
         newColumnWidths.set(column.key, width);
         return newColumnWidths;
@@ -578,13 +578,12 @@ function DataGrid<R, SR, K extends Key>(
   function commitEditorChanges() {
     if (
       columns[selectedPosition.idx]?.editor == null ||
-      selectedPosition.mode === 'SELECT' ||
-      selectedPosition.row === selectedPosition.originalRow
+      selectedPosition.mode === 'SELECT'
     ) {
       return;
     }
 
-    updateRow(selectedPosition.rowIdx, selectedPosition.row);
+    updateRow(selectedPosition.rowIdx, rawRows[getRawRowIdx(selectedPosition.rowIdx)]);
   }
 
   function handleCopy() {
@@ -640,13 +639,11 @@ function DataGrid<R, SR, K extends Key>(
     if (event.isDefaultPrevented()) return;
 
     if (isCellEditable(selectedPosition) && isDefaultCellInput(event)) {
-      setSelectedPosition(({ idx, rowIdx }) => ({
-        idx,
-        rowIdx,
+      onSelectedPositionChange({
+        idx: selectedPosition.idx,
+        rowIdx: selectedPosition.rowIdx,
         mode: 'EDIT',
-        row,
-        originalRow: row
-      }));
+      });
     }
   }
 
@@ -656,7 +653,7 @@ function DataGrid<R, SR, K extends Key>(
       updateRow(selectedPosition.rowIdx, row);
       closeEditor();
     } else {
-      setSelectedPosition((position) => ({ ...position, row }));
+      onSelectedPositionChange(selectedPosition);
     }
   }
 
@@ -698,8 +695,7 @@ function DataGrid<R, SR, K extends Key>(
     commitEditorChanges();
 
     if (enableEditor && isCellEditable(position)) {
-      const row = rows[position.rowIdx] as R;
-      setSelectedPosition({ ...position, mode: 'EDIT', row, originalRow: row });
+      onSelectedPositionChange({ ...position, mode: 'EDIT' });
     } else if (
       selectedPosition.mode !== 'SELECT' ||
       selectedPosition.idx !== position.idx ||
@@ -707,13 +703,13 @@ function DataGrid<R, SR, K extends Key>(
     ) {
       // Avoid re-renders if the selected cell state is the same
       // TODO: replace with a #record? https://github.com/microsoft/TypeScript/issues/39831
-      setSelectedPosition({ ...position, mode: 'SELECT' });
+      onSelectedPositionChange({ ...position, mode: 'SELECT' });
     }
   }
 
   function closeEditor() {
     if (selectedPosition.mode === 'SELECT') return;
-    setSelectedPosition(({ idx, rowIdx }) => ({ idx, rowIdx, mode: 'SELECT' }));
+    onSelectedPositionChange({idx: selectedPosition.idx, rowIdx: selectedPosition.rowIdx, mode: 'SELECT' });
   }
 
   function scrollToCell({ idx, rowIdx }: Partial<Position>): void {
@@ -722,7 +718,7 @@ function DataGrid<R, SR, K extends Key>(
 
     if (typeof idx === 'number' && idx > lastFrozenColumnIndex) {
       rowIdx ??= selectedPosition.rowIdx;
-      if (!isCellWithinSelectionBounds({ rowIdx, idx })) return;
+      if (!(typeof rowIdx !== 'undefined' && isCellWithinSelectionBounds({ rowIdx, idx }))) return;
       const { clientWidth } = current;
       const column = columns[idx];
       const { left, width } = columnMetrics.get(column)!;
@@ -922,8 +918,9 @@ function DataGrid<R, SR, K extends Key>(
   function getCellEditor(rowIdx: number) {
     if (selectedPosition.rowIdx !== rowIdx || selectedPosition.mode === 'SELECT') return;
 
-    const { idx, row } = selectedPosition;
+    const { idx } = selectedPosition;
     const column = columns[idx];
+    const row = rawRows[getRawRowIdx(rowIdx)];
     const colSpan = getColSpan(column, lastFrozenColumnIndex, { type: 'ROW', row });
 
     return (
@@ -1057,16 +1054,8 @@ function DataGrid<R, SR, K extends Key>(
 
   // Reset the positions if the current values are no longer valid. This can happen if a column or row is removed
   if (selectedPosition.idx > maxColIdx || selectedPosition.rowIdx > maxRowIdx) {
-    setSelectedPosition(initialPosition);
+    onSelectedPositionChange(initialPosition);
     setDraggedOverRowIdx(undefined);
-  }
-
-  if (
-    selectedPosition.mode === 'EDIT' &&
-    rows[selectedPosition.rowIdx] !== selectedPosition.originalRow
-  ) {
-    // Discard changes if rows are updated from outside
-    closeEditor();
   }
 
   return (
