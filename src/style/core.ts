@@ -34,9 +34,30 @@ const darkTheme = `
 `;
 
 const root = css`
-  ${lightTheme}
+  @media (prefers-color-scheme: light) {
+     & {
+      ${lightTheme}
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+     & {
+      ${darkTheme}
+    }
+  }
+  
+  &.rdg-dark, :root[data-theme='dark'] & {
+    --color-scheme: dark;
+    ${darkTheme}
+  }
+
+  &.rdg-light, :root[data-theme='light'] & {
+    --color-scheme: light;
+    ${lightTheme}
+  }
+
+  
   --selection-color: #66afe9;
-  --font-size: 14px;
+  --font-size: 1rem;
 
   color-scheme: var(--color-scheme, light dark);
 
@@ -65,21 +86,6 @@ const root = css`
   *::before,
   *::after {
     box-sizing: inherit;
-  }
-
-  &.rdg-dark {
-    --color-scheme: dark;
-    ${darkTheme}
-  }
-
-  &.rdg-light {
-    --color-scheme: light;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    &:not(.rdg-light) {
-      ${darkTheme}
-    }
   }
 `;
 
