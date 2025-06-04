@@ -159,7 +159,7 @@ export interface DataGridProps<R, SR = unknown, K extends Key = Key> extends Sha
   /**
    * Miscellaneous
    */
-  rowRenderer?: Maybe<React.ComponentType<RowRendererProps<R, SR>>>;
+  rowRenderer?: (props: RowRendererProps<R, SR> & { key: Key }) => React.ReactElement | null;
   noRowsFallback?: React.ReactNode;
   rowClass?: Maybe<(row: R) => Maybe<string>>;
   'data-testid'?: Maybe<string>;
@@ -647,7 +647,7 @@ function DataGrid<R, SR, K extends Key>(
     }
   }
 
-  function handleEditorRowChange(row: R, commitChanges?: boolean) {
+  function handleEditorRowChange(row: R, rowIdx: number, commitChanges?: boolean) {
     if (selectedPosition.mode === 'SELECT') return;
     if (commitChanges) {
       updateRow(selectedPosition.rowIdx, row);
@@ -929,6 +929,7 @@ function DataGrid<R, SR, K extends Key>(
         column={column}
         colSpan={colSpan}
         row={row}
+        rowIdx={rowIdx}
         onRowChange={handleEditorRowChange}
         onClose={handleOnClose}
       />
@@ -1019,33 +1020,34 @@ function DataGrid<R, SR, K extends Key>(
       }
 
       rowElements.push(
-        <RowRenderer
-          aria-rowindex={headerRowsCount + (hasGroups ? startRowIndex : rowIdx) + 1} // aria-rowindex is 1 based
-          aria-selected={isSelectable ? isRowSelected : undefined}
-          key={key}
-          rowIdx={rowIdx}
-          row={row}
-          viewportColumns={rowColumns}
-          isRowSelected={isRowSelected}
-          onRowClick={onRowClick}
-          onRowDoubleClick={onRowDoubleClick}
-          rowClass={rowClass}
-          top={top}
-          height={getRowHeight(rowIdx)}
-          copiedCellIdx={
+        // PW: edited here, call as a function instead to avoid making a new react element every render
+        RowRenderer({
+          "aria-rowindex": headerRowsCount + (hasGroups ? startRowIndex : rowIdx) + 1, // aria-rowindex is 1 based
+          "aria-selected": isSelectable ? isRowSelected : undefined,
+          key: key,
+          rowIdx: rowIdx,
+          row: row,
+          viewportColumns: rowColumns,
+          isRowSelected: isRowSelected,
+          onRowClick: onRowClick,
+          onRowDoubleClick: onRowDoubleClick,
+          rowClass: rowClass,
+          top: top,
+          height: getRowHeight(rowIdx),
+          copiedCellIdx:
             copiedCell !== null && copiedCell.row === row
               ? columns.findIndex((c) => c.key === copiedCell.columnKey)
               : undefined
-          }
-          selectedCellIdx={selectedRowIdx === rowIdx ? selectedIdx : undefined}
-          draggedOverCellIdx={getDraggedOverCellIdx(rowIdx)}
-          setDraggedOverRowIdx={isDragging ? setDraggedOverRowIdx : undefined}
-          lastFrozenColumnIndex={lastFrozenColumnIndex}
-          onRowChange={handleFormatterRowChangeLatest}
-          selectCell={selectViewportCellLatest}
-          selectedCellDragHandle={getDragHandle(rowIdx)}
-          selectedCellEditor={getCellEditor(rowIdx)}
-        />
+          ,
+          selectedCellIdx: selectedRowIdx === rowIdx ? selectedIdx : undefined,
+          draggedOverCellIdx: getDraggedOverCellIdx(rowIdx),
+          setDraggedOverRowIdx: isDragging ? setDraggedOverRowIdx : undefined,
+          lastFrozenColumnIndex: lastFrozenColumnIndex,
+          onRowChange: handleFormatterRowChangeLatest,
+          selectCell: selectViewportCellLatest,
+          selectedCellDragHandle: getDragHandle(rowIdx),
+          selectedCellEditor: getCellEditor(rowIdx),
+        })
       );
     }
 

@@ -57,7 +57,7 @@ function GroupedRow<R, SR>({
   toggleGroup,
   ...props
 }: GroupRowRendererProps<R, SR>) {
-  const { ref, tabIndex, className } = useRovingRowRef(selectedCellIdx);
+  const { /*ref, tabIndex, */className } = useRovingRowRef(selectedCellIdx);
 
   // Select is always the first column
   const idx = viewportColumns[0].key === SELECT_COLUMN_KEY ? level + 1 : level;
@@ -72,8 +72,8 @@ function GroupedRow<R, SR>({
         role="row"
         aria-level={level}
         aria-expanded={isExpanded}
-        ref={ref}
-        tabIndex={tabIndex}
+        // ref={ref}
+        tabIndex={selectedCellIdx === -1 ? 0 : -1}
         className={clsx(
           rowClassname,
           groupRowClassname,

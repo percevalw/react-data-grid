@@ -1,10 +1,9 @@
-import React from 'react';
-import { memo, forwardRef } from 'react';
+import React, { forwardRef } from 'react';
 import type { RefAttributes, CSSProperties } from 'react';
 import clsx from 'clsx';
 
 import Cell from './Cell';
-import { RowSelectionProvider, useLatestFunc, useCombinedRefs, useRovingRowRef } from './hooks';
+import { RowSelectionProvider, useLatestFunc/*, useCombinedRefs*/, useRovingRowRef } from './hooks';
 import { getColSpan } from './utils';
 import { rowClassname } from './style';
 import type { RowRendererProps } from './types';
@@ -35,7 +34,8 @@ function Row<R, SR>(
   }: RowRendererProps<R, SR>,
   ref: React.Ref<HTMLDivElement>
 ) {
-  const { ref: rowRef, tabIndex, className: rovingClassName } = useRovingRowRef(selectedCellIdx);
+  // const { ref: rowRef, tabIndex, className: rovingClassName } = useRovingRowRef(selectedCellIdx);
+  const { className: rovingClassName } = useRovingRowRef(selectedCellIdx);
 
   const handleRowChange = useLatestFunc((newRow: R) => {
     onRowChange(rowIdx, newRow);
@@ -75,6 +75,7 @@ function Row<R, SR>(
           column={column}
           colSpan={colSpan}
           row={row}
+          rowIdx={rowIdx}
           isCopied={copiedCellIdx === idx}
           isDraggedOver={draggedOverCellIdx === idx}
           isCellSelected={isCellSelected}
@@ -92,8 +93,8 @@ function Row<R, SR>(
     <RowSelectionProvider value={isRowSelected}>
       <div
         role="row"
-        ref={useCombinedRefs(ref, rowRef)}
-        tabIndex={tabIndex}
+        // ref={useCombinedRefs(ref}
+        tabIndex={selectedCellIdx === -1 ? 0 : -1}
         className={className}
         onMouseEnter={handleDragEnter}
         style={
@@ -110,8 +111,8 @@ function Row<R, SR>(
   );
 }
 
-export default memo(Row) as <R, SR>(props: RowRendererProps<R, SR>) => JSX.Element;
+export default Row as <R, SR>(props: RowRendererProps<R, SR>) => JSX.Element;
 
-export const RowWithRef = memo(forwardRef(Row)) as <R, SR>(
+export const RowWithRef = forwardRef(Row) as <R, SR>(
   props: RowRendererProps<R, SR> & RefAttributes<HTMLDivElement>
 ) => JSX.Element;

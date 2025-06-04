@@ -71,8 +71,9 @@ export interface Position {
 export interface FormatterProps<TRow, TSummaryRow = unknown> {
   column: CalculatedColumn<TRow, TSummaryRow>;
   row: TRow;
+  rowIdx: number;
   isCellSelected: boolean;
-  onRowChange: (row: TRow) => void;
+  onRowChange: (row: TRow, rowIdx: number) => void;
 }
 
 export interface SummaryFormatterProps<TSummaryRow, TRow = unknown> {
@@ -94,7 +95,8 @@ export interface GroupFormatterProps<TRow, TSummaryRow = unknown> {
 export interface EditorProps<TRow, TSummaryRow = unknown> {
   column: CalculatedColumn<TRow, TSummaryRow>;
   row: TRow;
-  onRowChange: (row: TRow, commitChanges?: boolean) => void;
+  rowIdx: number;
+  onRowChange: (row: TRow, rowIdx: number, commitChanges?: boolean) => void;
   onClose: (commitChanges?: boolean) => void;
 }
 
@@ -117,6 +119,7 @@ export interface CellRendererProps<TRow, TSummaryRow>
   column: CalculatedColumn<TRow, TSummaryRow>;
   colSpan: number | undefined;
   row: TRow;
+  rowIdx: number;
   isCopied: boolean;
   isDraggedOver: boolean;
   isCellSelected: boolean;

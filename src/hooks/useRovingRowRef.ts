@@ -1,7 +1,7 @@
 import { css } from '@linaria/core';
 
 import { cell } from '../style';
-import { useFocusRef } from './useFocusRef';
+// import { useFocusRef } from './useFocusRef';
 
 const rowSelected = css`
   outline: none;
@@ -25,11 +25,11 @@ export const rowSelectedClassname = `rdg-row-selected ${rowSelected}`;
 
 export function useRovingRowRef(selectedCellIdx: number | undefined) {
   const isSelected = selectedCellIdx === -1;
-  const { ref, tabIndex } = useFocusRef<HTMLDivElement>(isSelected);
+  // const { ref, tabIndex } = useFocusRef<HTMLDivElement>(isSelected);
 
   return {
-    ref,
-    tabIndex,
+    // ref,
+    // tabIndex,
     className: isSelected ? rowSelectedClassname : undefined
   };
 }

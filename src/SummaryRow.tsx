@@ -48,7 +48,7 @@ function SummaryRow<R, SR>({
   selectCell,
   'aria-rowindex': ariaRowIndex
 }: SummaryRowProps<R, SR>) {
-  const { ref, tabIndex, className } = useRovingRowRef(selectedCellIdx);
+  const { /*ref, tabIndex, */className } = useRovingRowRef(selectedCellIdx);
   const cells = [];
   for (let index = 0; index < viewportColumns.length; index++) {
     const column = viewportColumns[index];
@@ -75,8 +75,8 @@ function SummaryRow<R, SR>({
     <div
       role="row"
       aria-rowindex={ariaRowIndex}
-      ref={ref}
-      tabIndex={tabIndex}
+      // ref={ref}
+      tabIndex={selectedCellIdx === -1 ? 0 : -1}
       className={clsx(
         rowClassname,
         `rdg-row-${rowIdx % 2 === 0 ? 'even' : 'odd'}`,

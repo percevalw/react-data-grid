@@ -60,7 +60,7 @@ function HeaderRow<R, SR, K extends React.Key>({
   selectCell,
   shouldFocusGrid
 }: HeaderRowProps<R, SR, K>) {
-  const { ref, tabIndex, className } = useRovingRowRef(selectedCellIdx);
+  const { /*ref, tabIndex, */className } = useRovingRowRef(selectedCellIdx);
 
   const cells = [];
   for (let index = 0; index < columns.length; index++) {
@@ -91,8 +91,8 @@ function HeaderRow<R, SR, K extends React.Key>({
     <div
       role="row"
       aria-rowindex={1} // aria-rowindex is 1 based
-      ref={ref}
-      tabIndex={tabIndex}
+      // ref={ref}
+      tabIndex={selectedCellIdx === -1 ? 0 : -1}
       className={clsx(headerRowClassname, className)}
     >
       {cells}

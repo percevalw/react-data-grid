@@ -36,6 +36,7 @@ export default function EditCell<R, SR>({
   column,
   colSpan,
   row,
+  rowIdx,
   onRowChange,
   onClose
 }: EditCellProps<R, SR>) {
@@ -46,7 +47,7 @@ export default function EditCell<R, SR>({
   // as `onWindowCaptureMouseDown` might otherwise miss valid mousedown events.
   // To that end we instead access the latest props via useLatestFunc.
   const commitOnOutsideMouseDown = useLatestFunc(() => {
-    onRowChange(row, true);
+    onRowChange(row, rowIdx, true);
   });
 
   function cancelFrameRequest() {
@@ -88,9 +89,9 @@ export default function EditCell<R, SR>({
     >
       {column.editor != null && (
         <>
-          <column.editor column={column} row={row} onRowChange={onRowChange} onClose={onClose} />
+          <column.editor column={column} row={row} rowIdx={rowIdx} onRowChange={onRowChange} onClose={onClose} />
           {column.editorOptions?.renderFormatter && (
-            <column.formatter column={column} row={row} isCellSelected onRowChange={onRowChange} />
+            <column.formatter column={column} row={row} rowIdx={rowIdx} isCellSelected onRowChange={onRowChange} />
           )}
         </>
       )}

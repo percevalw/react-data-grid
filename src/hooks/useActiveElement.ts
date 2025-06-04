@@ -1,6 +1,7 @@
 import React, {RefObject, useEffect, useRef} from "react";
 
 export const ActiveContext = React.createContext({current: false});
+ActiveContext.displayName = 'ActiveContext';
 
 export const useActiveElement = (gridRef: RefObject<HTMLElement>) => {
     const activeRef = useRef(document.activeElement === gridRef.current);

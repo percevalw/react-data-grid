@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react';
 import type { SelectRowEvent } from '../types';
 
 const RowSelectionContext = createContext<boolean | undefined>(undefined);
+RowSelectionContext.displayName = 'RowSelectionContext';
 
 export const RowSelectionProvider = RowSelectionContext.Provider;
 
@@ -9,6 +10,7 @@ const RowSelectionChangeContext = createContext<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ((selectRowEvent: SelectRowEvent<any>) => void) | undefined
 >(undefined);
+RowSelectionChangeContext.displayName = 'RowSelectionChangeContext';
 
 export const RowSelectionChangeProvider = RowSelectionChangeContext.Provider;
 
