@@ -28,6 +28,10 @@ const cellRangeSelected = css`
 
 const cellRangeSelectedClassname = `rdg-cell-range-selected ${cellRangeSelected}`;
 
+type MouseEventWithSelectionFlag = MouseEvent & {
+  rdgSelectionHandledOnMouseDown?: boolean;
+};
+
 function Cell<R, SR>({
   column,
   colSpan,
@@ -62,7 +66,12 @@ function Cell<R, SR>({
   }
 
   function handleClick(event: React.MouseEvent<HTMLDivElement>) {
-    selectCellWrapper(column.editorOptions?.editOnClick, event.shiftKey);
+    const editOnClick = column.editorOptions?.editOnClick;
+    const selectionHandledOnMouseDown = (event.nativeEvent as MouseEventWithSelectionFlag)
+      .rdgSelectionHandledOnMouseDown;
+    if (editOnClick || !selectionHandledOnMouseDown) {
+      selectCellWrapper(editOnClick, event.shiftKey);
+    }
     onRowClick?.(row, column);
   }
 

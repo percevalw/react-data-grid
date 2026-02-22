@@ -60,6 +60,10 @@ interface EditCellState extends Position {
   readonly ranges?: readonly SelectionRange[];
 }
 
+type MouseEventWithSelectionFlag = MouseEvent & {
+  rdgSelectionHandledOnMouseDown?: boolean;
+};
+
 export interface SelectionRange {
   readonly rowIdx: number;
 }
@@ -265,6 +269,7 @@ function DataGrid<R, SR, K extends Key>(
   const lastSelectedRowIdx = useRef(-1);
   const selectedCellRangeAnchorRef = useRef<Position | undefined>(undefined);
   const isMouseSelectingRangeRef = useRef(false);
+  const wasSelectionHandledOnMouseDownRef = useRef(false);
 
   /**
    * computed values
@@ -779,12 +784,14 @@ function DataGrid<R, SR, K extends Key>(
   }
 
   function handleGridMouseDownCapture(event: React.MouseEvent<HTMLDivElement>) {
+    wasSelectionHandledOnMouseDownRef.current = false;
     if (event.button !== 0 || selectedPosition.mode === 'EDIT' || isDragging) return;
 
     const mouseDownCellPosition = getCellPositionFromTarget(event.target);
     if (mouseDownCellPosition == null) return;
 
     isMouseSelectingRangeRef.current = true;
+    wasSelectionHandledOnMouseDownRef.current = true;
     selectCell(mouseDownCellPosition, false, event.shiftKey);
   }
 
@@ -800,6 +807,12 @@ function DataGrid<R, SR, K extends Key>(
     if (mouseOverCellPosition == null) return;
 
     selectCell(mouseOverCellPosition, false, true);
+  }
+
+  function handleGridClickCapture(event: React.MouseEvent<HTMLDivElement>) {
+    (event.nativeEvent as MouseEventWithSelectionFlag).rdgSelectionHandledOnMouseDown =
+      wasSelectionHandledOnMouseDownRef.current;
+    wasSelectionHandledOnMouseDownRef.current = false;
   }
 
   function handleGridMouseUpCapture() {
@@ -1379,6 +1392,7 @@ function DataGrid<R, SR, K extends Key>(
             onKeyDown={handleKeyDown}
             onMouseDownCapture={handleGridMouseDownCapture}
             onMouseOverCapture={handleGridMouseOverCapture}
+            onClickCapture={handleGridClickCapture}
             onMouseUpCapture={handleGridMouseUpCapture}
             data-testid={testId}
         >
