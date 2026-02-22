@@ -22,10 +22,17 @@ const cellDraggedOver = css`
 
 const cellDraggedOverClassname = `rdg-cell-dragged-over ${cellDraggedOver}`;
 
+const cellRangeSelected = css`
+  background-color: rgba(0, 120, 215, 0.15);
+`;
+
+const cellRangeSelectedClassname = `rdg-cell-range-selected ${cellRangeSelected}`;
+
 function Cell<R, SR>({
   column,
   colSpan,
   isCellSelected,
+  isCellWithinSelectionRange,
   isCopied,
   isDraggedOver,
   row,
@@ -44,17 +51,18 @@ function Cell<R, SR>({
     column,
     {
       [cellCopiedClassname]: isCopied,
-      [cellDraggedOverClassname]: isDraggedOver
+      [cellDraggedOverClassname]: isDraggedOver,
+      [cellRangeSelectedClassname]: isCellWithinSelectionRange
     },
     typeof cellClass === 'function' ? cellClass(row) : cellClass
   );
 
-  function selectCellWrapper(openEditor?: boolean | null) {
-    selectCell(row, column, openEditor);
+  function selectCellWrapper(openEditor?: boolean | null, extendSelection?: boolean) {
+    selectCell(row, column, openEditor, extendSelection);
   }
 
-  function handleClick() {
-    selectCellWrapper(column.editorOptions?.editOnClick);
+  function handleClick(event: React.MouseEvent<HTMLDivElement>) {
+    selectCellWrapper(column.editorOptions?.editOnClick, event.shiftKey);
     onRowClick?.(row, column);
   }
 
@@ -74,6 +82,8 @@ function Cell<R, SR>({
       aria-selected={isCellSelected}
       aria-colspan={colSpan}
       aria-readonly={!isCellEditable(column, row) || undefined}
+      data-idx={column.idx}
+      data-rowidx={rowIdx}
       ref={ref}
       tabIndex={tabIndex}
       className={className}

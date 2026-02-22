@@ -1,6 +1,6 @@
 import { css } from '@linaria/core';
 
-import { cell } from '../style';
+import { cell } from '../style/cell';
 // import { useFocusRef } from './useFocusRef';
 
 const rowSelected = css`

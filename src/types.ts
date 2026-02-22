@@ -68,6 +68,18 @@ export interface Position {
   readonly rowIdx: number;
 }
 
+export interface SelectedCellRange {
+  readonly startIdx: number;
+  readonly endIdx: number;
+  readonly startRowIdx: number;
+  readonly endRowIdx: number;
+}
+
+export interface SelectedCellRangeInRow {
+  readonly startIdx: number;
+  readonly endIdx: number;
+}
+
 export interface FormatterProps<TRow, TSummaryRow = unknown> {
   column: CalculatedColumn<TRow, TSummaryRow>;
   row: TRow;
@@ -123,6 +135,7 @@ export interface CellRendererProps<TRow, TSummaryRow>
   isCopied: boolean;
   isDraggedOver: boolean;
   isCellSelected: boolean;
+  isCellWithinSelectionRange: boolean;
   dragHandle: ReactElement<React.HTMLAttributes<HTMLDivElement>> | undefined;
   onRowChange: (newRow: TRow) => void;
 }
@@ -133,6 +146,7 @@ export interface RowRendererProps<TRow, TSummaryRow = unknown>
   row: TRow;
   rowIdx: number;
   selectedCellIdx: number | undefined;
+  selectedCellRange: SelectedCellRangeInRow | undefined;
   copiedCellIdx: number | undefined;
   draggedOverCellIdx: number | undefined;
   lastFrozenColumnIndex: number;
@@ -149,7 +163,8 @@ export interface RowRendererProps<TRow, TSummaryRow = unknown>
   selectCell: (
     row: TRow,
     column: CalculatedColumn<TRow, TSummaryRow>,
-    enableEditor?: Maybe<boolean>
+    enableEditor?: Maybe<boolean>,
+    extendSelection?: boolean
   ) => void;
 }
 

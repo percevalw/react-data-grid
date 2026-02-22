@@ -4,7 +4,8 @@ import { memo } from 'react';
 import clsx from 'clsx';
 import { css } from '@linaria/core';
 
-import { cell, cellFrozenLast, rowClassname } from './style';
+import { cell, cellFrozenLast } from './style/cell';
+import { rowClassname } from './style/row';
 import { SELECT_COLUMN_KEY } from './Columns';
 import GroupCell from './GroupCell';
 import type { CalculatedColumn, GroupRow, Omit } from './types';

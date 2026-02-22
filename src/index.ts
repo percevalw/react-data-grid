@@ -1,5 +1,5 @@
 export { default } from './DataGrid';
-export type { DataGridProps, DataGridHandle } from './DataGrid';
+export type { DataGridProps, DataGridHandle, SelectionRange } from './DataGrid';
 export { RowWithRef as Row } from './Row';
 export * from './Columns';
 export * from './formatters';
@@ -10,6 +10,8 @@ export type {
   Column,
   CalculatedColumn,
   FormatterProps,
+  SelectedCellRange,
+  SelectedCellRangeInRow,
   SummaryFormatterProps,
   GroupFormatterProps,
   EditorProps,

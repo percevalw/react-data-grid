@@ -3,7 +3,8 @@ import { memo } from 'react';
 import clsx from 'clsx';
 import { css } from '@linaria/core';
 
-import { cell, row, rowClassname } from './style';
+import { cell } from './style/cell';
+import { row, rowClassname } from './style/row';
 import { getColSpan } from './utils';
 import SummaryCell from './SummaryCell';
 import type { CalculatedColumn, RowRendererProps } from './types';

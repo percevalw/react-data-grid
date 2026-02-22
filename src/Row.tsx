@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import Cell from './Cell';
 import { RowSelectionProvider, useLatestFunc/*, useCombinedRefs*/, useRovingRowRef } from './hooks';
 import { getColSpan } from './utils';
-import { rowClassname } from './style';
+import { rowClassname } from './style/row';
 import type { RowRendererProps } from './types';
 
 function Row<R, SR>(
@@ -13,6 +13,7 @@ function Row<R, SR>(
     className,
     rowIdx,
     selectedCellIdx,
+    selectedCellRange,
     isRowSelected,
     copiedCellIdx,
     draggedOverCellIdx,
@@ -65,6 +66,10 @@ function Row<R, SR>(
     }
 
     const isCellSelected = selectedCellIdx === idx;
+    const isCellWithinSelectionRange =
+      selectedCellRange != null &&
+      idx >= selectedCellRange.startIdx &&
+      idx <= selectedCellRange.endIdx;
 
     if (isCellSelected && selectedCellEditor) {
       cells.push(selectedCellEditor);
@@ -79,6 +84,7 @@ function Row<R, SR>(
           isCopied={copiedCellIdx === idx}
           isDraggedOver={draggedOverCellIdx === idx}
           isCellSelected={isCellSelected}
+          isCellWithinSelectionRange={isCellWithinSelectionRange}
           dragHandle={isCellSelected ? selectedCellDragHandle : undefined}
           onRowClick={onRowClick}
           onRowDoubleClick={onRowDoubleClick}
